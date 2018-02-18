@@ -14,6 +14,9 @@ run
 
 
 ### Screenshots
-|  Mac  | Ubuntu |
-| :---: | :---: | 
-|<img src="screenshots/MAC/1.png" width="500px;" height="400px;"> |   <img src="screenshots/Ubuntu/ps aux.png" width="500px;" height="400px;">    |
+|                    Mac                           |                           Ubuntu                         |
+| :-----------------------------------------------:| :------------------------------------------------------: | 
+| <img src="screenshots/MAC/1.png" width="800px;"> | <img src="screenshots/Ubuntu/top.png" width="800px;">    |
+| <img src="screenshots/MAC/3.png" width="800px;"> | <img src="screenshots/Ubuntu/ps aux.png" width="800px;"> |
+| <img src="screenshots/MAC/4.png" width="800px;"> | <img src="screenshots/Ubuntu/browser process" width="800px;"> |
+| <img src="screenshots/MAC/6.png" width="800px;"> | <img src="screenshots/Ubuntu/kill.png" width="800px;"> |
