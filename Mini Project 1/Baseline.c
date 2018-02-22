@@ -18,6 +18,11 @@ void concIntToString(char *s, int indx);
 
 int main(int argc, char * argv[])   { 
 
+    if(argc < 2) {
+        printf("USAGE: ./Baseline [Directory_Name]\n");
+        return 0;
+    }
+
     char * directoryName = argv[1];  /* Directory name to be created */
     newDirectoryName = malloc(strlen(directoryName) + 1);
     strcpy(newDirectoryName, directoryName);
@@ -26,6 +31,7 @@ int main(int argc, char * argv[])   {
         isFound = scandir(directoryName, &folders, 0, alphasort);
         if (isFound == -1) {
             mkdir(directoryName, 0700);
+            printf("New Directory is Created: %s\n", directoryName);
             return 0;
         }
         else {
