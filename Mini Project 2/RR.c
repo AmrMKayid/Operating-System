@@ -9,15 +9,15 @@ typedef struct cpu CPU;
 unsigned quantumLength;
 
 Process *newProcess(unsigned *pID, unsigned *arrival, unsigned *burst);
-void processInfo(Process *p, int *execTime);
 Queue *newQueue(unsigned capacity);
 int getQueueSizeFromInput(char *filename);
 int queueCurrentSize(Queue *q);
 void enqueue(Queue *q, Process *process);
-void dequeue(Queue *q, CPU *processor);
+void dequeue(Queue *q);
 void readCSV(Queue *q, char *filename);
-void RRScheduler(CPU *cpuUNIT, Queue *ready_queue, unsigned *quantumLength);
+void RRScheduler(Queue *ready_queue, unsigned *quantumLength);
 int computeBurstTime(Process *p, unsigned *quantumLength);
+void delay(int ms);
 
 /**************** Processes ****************/
 /*
@@ -47,27 +47,9 @@ Process *newProcess(unsigned *pID, unsigned *arrival, unsigned *burst) {
     return p;
 }
 
-void processInfo(Process *p, int *execTime) {
-
-    p->turnAroundTime = *execTime - p->arrivalTime;
-
-    p->waitingTime = p->turnAroundTime - p->completionTime;
-}
-
-/*********************************************/
-
-/****************** CPU *********************/
-
-typedef struct cpu {
-    unsigned waitingTime;
-    unsigned completionTime;
-    unsigned contextSwitchesTime;
-    time_t timeRunning;
-} CPU;
 
 
 /*********************************************/
-
 
 /**************** ReadyQueue ****************/
 
@@ -120,7 +102,7 @@ void enqueue(Queue *q, Process *process) {
     }
 }
 
-void dequeue(Queue *q, CPU *processor) {
+void dequeue(Queue *q) {
     q->front = 0;
     q->rear = q->currentSize - 1;
     Process *tmpProcess = q->procArr[q->front];
@@ -185,17 +167,35 @@ void readCSV(Queue *q, char *filename) {
     fclose(fPointer);
 }
 
+void delay(int ms) {
+    long halt;
+    clock_t current, previous;
+
+    halt = ms*(CLOCKS_PER_SEC/1000);
+    current = previous = clock();
+
+    while((current-previous) < halt )
+        current = clock();
+}
+
 int computeBurstTime(Process *p, unsigned *quantumLength) {
     for (size_t i = *quantumLength; i > 0; i--) {
         if (p->cpuBurstTime != 0) {
             p->cpuBurstTime--;
             p->completionTime++;
+            //delay(1);
         }
     }
     return p->cpuBurstTime;
 }
 
-void RRScheduler(CPU *cpuUNIT, Queue *ready_queue, unsigned *quantumLength) {
+void RRScheduler(Queue *ready_queue, unsigned *quantumLength) {
+
+    double AverageWaitingTime = 0;
+    double AverageTurnaroundTime = 0;
+
+    size_t i = *quantumLength;
+    unsigned c = 0;
 
     Process *newProcess = ready_queue->procArr[ready_queue->front];
 
@@ -203,35 +203,36 @@ void RRScheduler(CPU *cpuUNIT, Queue *ready_queue, unsigned *quantumLength) {
 
         if (newProcess->cpuBurstTime > 0) {
             // TODO: Change time
-            printf("Time %d:\t P%d Entering quantum\n", 0, newProcess->processID);
+            printf("Time %6d:\t P%d Entering quantum\n", c, newProcess->processID);
+            c += (i < newProcess->cpuBurstTime)? i: newProcess->cpuBurstTime;
+
             newProcess->cpuBurstTime = computeBurstTime(newProcess, quantumLength);
-            time_t end_execution = clock() / CLOCKS_PER_SEC;
 
             if (newProcess->cpuBurstTime == 0) {
-
-                int execution_time = end_execution - (int) cpuUNIT->timeRunning;
-                processInfo(newProcess, &execution_time);
-
-
-                if (newProcess->contextSwitchCount != 0)
-                    cpuUNIT->contextSwitchesTime += newProcess->contextSwitchCount;
-
-                cpuUNIT->waitingTime += newProcess->waitingTime;
+                AverageWaitingTime += c - newProcess->completionTime;
+                AverageTurnaroundTime += c;
+//                printf("Average Waiting Time= %d\n", AverageWaitingTime);
+//                printf("Average Turnaround Time= %d\n", AverageTurnaroundTime);
+                printf("Time %6d:\t P%d Done Turn around: %d Waiting time: %d\n", c, newProcess->processID, c, c - newProcess->completionTime);
 
                 ready_queue->procArr[ready_queue->front] = NULL;
 
-                // TODO: print process Turn around & waiting time
             }
             else {
                 newProcess->contextSwitchCount += 1;
             }
 
-            dequeue(ready_queue, cpuUNIT);
+            dequeue(ready_queue);
 
             newProcess = ready_queue->procArr[ready_queue->front];
         }
     }
+
+
+    printf("\nAverage Waiting Time= %f\n", AverageWaitingTime/ready_queue->capacity);
+    printf("Average Turnaround Time= %f\n", AverageTurnaroundTime/ready_queue->capacity);
 }
+
 
 /*********************************************/
 
@@ -240,12 +241,10 @@ int main(int argc, char *argv[]) {
     int queueSize = getQueueSizeFromInput(FILENAME);
     Queue *ready_queue = newQueue(queueSize);
     readCSV(ready_queue, FILENAME);
-    printf("Quantum Length: %d\n", quantumLength);
+//    printf("Quantum Length: %d\n", quantumLength);
 
-    CPU cpuUNIT = {0, 0, 0, 0};
+    RRScheduler(ready_queue, &quantumLength);
 
-    cpuUNIT.timeRunning = (int) clock() / CLOCKS_PER_SEC;
-    RRScheduler(&cpuUNIT, ready_queue, &quantumLength);
 
     return 0;
 
