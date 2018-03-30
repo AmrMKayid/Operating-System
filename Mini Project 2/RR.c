@@ -193,9 +193,9 @@ int computeBurstTime(Process *p, unsigned *quantumLength) {
         if (p->cpuBurstTime != 0) {
             p->cpuBurstTime--;
             p->completionTime++;
-            //delay(1);
         }
     }
+    delay((int) *quantumLength);
     return p->cpuBurstTime;
 }
 
@@ -213,6 +213,7 @@ void RRScheduler(Queue *ready_queue, unsigned *quantumLength) {
 
         if (newProcess->cpuBurstTime > 0) {
             // TODO: Change time
+            printf("Time %6d:\t P%d Entering quantum\n", c, newProcess->processID);
             fprintf(outFile, "Time %6d:\t P%d Entering quantum\n", c, newProcess->processID);
             c += (i < newProcess->cpuBurstTime) ? i : newProcess->cpuBurstTime;
 
@@ -223,8 +224,11 @@ void RRScheduler(Queue *ready_queue, unsigned *quantumLength) {
                 AverageTurnaroundTime += c;
 //                fprintf(outFile, "Average Waiting Time= %d\n", AverageWaitingTime);
 //                fprintf(outFile, "Average Turnaround Time= %d\n", AverageTurnaroundTime);
-                fprintf(outFile, "Time %6d:\t P%d Done Turn around: %d Waiting time: %d\n", c, newProcess->processID, c,
+
+                printf("Time %6d:\t P%d Done Turn around: %d Waiting time: %d\n", c, newProcess->processID, c,
                        c - newProcess->completionTime);
+                fprintf(outFile, "Time %6d:\t P%d Done Turn around: %d Waiting time: %d\n", c, newProcess->processID, c,
+                        c - newProcess->completionTime);
 
                 ready_queue->procArr[ready_queue->front] = NULL;
 
@@ -239,6 +243,9 @@ void RRScheduler(Queue *ready_queue, unsigned *quantumLength) {
     }
 
 
+    printf("\nAverage Waiting Time= %f\n", AverageWaitingTime / ready_queue->capacity);
+    printf("Average Turnaround Time= %f\n", AverageTurnaroundTime / ready_queue->capacity);
+
     fprintf(outFile, "\nAverage Waiting Time= %f\n", AverageWaitingTime / ready_queue->capacity);
     fprintf(outFile, "Average Turnaround Time= %f\n", AverageTurnaroundTime / ready_queue->capacity);
 }
@@ -247,9 +254,9 @@ void RRScheduler(Queue *ready_queue, unsigned *quantumLength) {
 /*********************************************/
 
 int main(int argc, char *argv[]) {
-    
+
     char *FILENAME = "/Users/amrmkayid/Desktop/RoundRobin/Input1.in";
-    outFile = fopen("Output1-RR.txt","w");
+    outFile = fopen("Output1-RR.txt", "w");
 
     int queueSize = getQueueSizeFromInput(FILENAME);
     Queue *ready_queue = newQueue(queueSize);
