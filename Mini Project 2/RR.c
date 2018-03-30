@@ -9,11 +9,15 @@ typedef struct cpu CPU;
 unsigned quantumLength;
 
 Process *newProcess(unsigned *pID, unsigned *arrival, unsigned *burst);
+void processInfo(Process *p, int *execTime);
 Queue *newQueue(unsigned capacity);
 int getQueueSizeFromInput(char *filename);
 int queueCurrentSize(Queue *q);
 void enqueue(Queue *q, Process *process);
+void dequeue(Queue *q, CPU *processor);
 void readCSV(Queue *q, char *filename);
+void RRScheduler(CPU *cpuUNIT, Queue *ready_queue, unsigned *quantumLength);
+int computeBurstTime(Process *p, unsigned *quantumLength);
 
 /**************** Processes ****************/
 /*
@@ -43,6 +47,13 @@ Process *newProcess(unsigned *pID, unsigned *arrival, unsigned *burst) {
     return p;
 }
 
+void processInfo(Process *p, int *execTime) {
+
+    p->turnAroundTime = *execTime - p->arrivalTime;
+
+    p->waitingTime = p->turnAroundTime - p->completionTime;
+}
+
 /*********************************************/
 
 /****************** CPU *********************/
@@ -60,6 +71,9 @@ typedef struct cpu {
 
 /**************** ReadyQueue ****************/
 
+/*
+ * A structure to represent a queue
+ */
 typedef struct queue {
     Process *procArr[1000];
     int front, rear, currentSize;
@@ -106,7 +120,31 @@ void enqueue(Queue *q, Process *process) {
     }
 }
 
+void dequeue(Queue *q, CPU *processor) {
+    q->front = 0;
+    q->rear = q->currentSize - 1;
+    Process *tmpProcess = q->procArr[q->front];
+
+    if (tmpProcess != NULL) {
+        tmpProcess->startTime = clock();
+        for (size_t i = 0; i < q->currentSize - 1; i++) {
+            q->procArr[i] = q->procArr[i + 1];
+        }
+        q->procArr[q->rear] = tmpProcess;
+        tmpProcess->endTime = clock();
+    } else {
+        for (size_t i = 0; i < q->currentSize - 1; i++) {
+            q->procArr[i] = q->procArr[i + 1];
+        }
+        q->currentSize--;
+    }
+
+}
+
 /*********************************************/
+
+
+/**************** Round Robin ****************/
 
 void readCSV(Queue *q, char *filename) {
 
@@ -147,6 +185,55 @@ void readCSV(Queue *q, char *filename) {
     fclose(fPointer);
 }
 
+int computeBurstTime(Process *p, unsigned *quantumLength) {
+    for (size_t i = *quantumLength; i > 0; i--) {
+        if (p->cpuBurstTime != 0) {
+            p->cpuBurstTime--;
+            p->completionTime++;
+        }
+    }
+    return p->cpuBurstTime;
+}
+
+void RRScheduler(CPU *cpuUNIT, Queue *ready_queue, unsigned *quantumLength) {
+
+    Process *newProcess = ready_queue->procArr[ready_queue->front];
+
+    while (newProcess != NULL) {
+
+        if (newProcess->cpuBurstTime > 0) {
+            // TODO: Change time
+            printf("Time %d:\t P%d Entering quantum\n", 0, newProcess->processID);
+            newProcess->cpuBurstTime = computeBurstTime(newProcess, quantumLength);
+            time_t end_execution = clock() / CLOCKS_PER_SEC;
+
+            if (newProcess->cpuBurstTime == 0) {
+
+                int execution_time = end_execution - (int) cpuUNIT->timeRunning;
+                processInfo(newProcess, &execution_time);
+
+
+                if (newProcess->contextSwitchCount != 0)
+                    cpuUNIT->contextSwitchesTime += newProcess->contextSwitchCount;
+
+                cpuUNIT->waitingTime += newProcess->waitingTime;
+
+                ready_queue->procArr[ready_queue->front] = NULL;
+
+                // TODO: print process Turn around & waiting time
+            }
+            else {
+                newProcess->contextSwitchCount += 1;
+            }
+
+            dequeue(ready_queue, cpuUNIT);
+
+            newProcess = ready_queue->procArr[ready_queue->front];
+        }
+    }
+}
+
+/*********************************************/
 
 int main(int argc, char *argv[]) {
     char *FILENAME = "/Users/amrmkayid/Desktop/RoundRobin/Input1.in";
@@ -154,6 +241,11 @@ int main(int argc, char *argv[]) {
     Queue *ready_queue = newQueue(queueSize);
     readCSV(ready_queue, FILENAME);
     printf("Quantum Length: %d\n", quantumLength);
+
+    CPU cpuUNIT = {0, 0, 0, 0};
+
+    cpuUNIT.timeRunning = (int) clock() / CLOCKS_PER_SEC;
+    RRScheduler(&cpuUNIT, ready_queue, &quantumLength);
 
     return 0;
 
