@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <time.h>
+#include <memory.h>
 
 struct processes {
    int  id;
@@ -11,6 +12,18 @@ struct processes {
    int complete;
    int brust;
 }; 
+
+
+void delay(int ms) {
+    long halt;
+    clock_t current, previous;
+
+    halt = ms * (CLOCKS_PER_SEC / 1000);
+    current = previous = clock();
+
+    while ((current - previous) < halt)
+        current = clock();
+}
 
 
 
@@ -144,6 +157,7 @@ int main(){
 		if(myProcTime <= quantum)
 		{
 			time = time + myProcTime;
+			delay(myProcTime);
 			record[myNumber].total = 0;
 			record[myNumber].complete = time;
 			for(int i=0; i < sizeOfAll; i++)
@@ -164,6 +178,7 @@ int main(){
 		else
 		{
 			time = time + quantum;
+			delay(quantum);
 			record[myNumber].total = record[myNumber].total - quantum;
 			for (int c = random - 1 ; c < sizeOfAll - 1 ; c++ )
 			{
