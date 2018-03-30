@@ -7,16 +7,26 @@ typedef struct process Process;
 typedef struct queue Queue;
 typedef struct cpu CPU;
 unsigned quantumLength;
+FILE *outFile;
 
 Process *newProcess(unsigned *pID, unsigned *arrival, unsigned *burst);
+
 Queue *newQueue(unsigned capacity);
+
 int getQueueSizeFromInput(char *filename);
+
 int queueCurrentSize(Queue *q);
+
 void enqueue(Queue *q, Process *process);
+
 void dequeue(Queue *q);
+
 void readCSV(Queue *q, char *filename);
+
 void RRScheduler(Queue *ready_queue, unsigned *quantumLength);
+
 int computeBurstTime(Process *p, unsigned *quantumLength);
+
 void delay(int ms);
 
 /**************** Processes ****************/
@@ -150,16 +160,16 @@ void readCSV(Queue *q, char *filename) {
 
     quantumLength = atoi(sentences[0]);
 
-    for(int l = 2; l < k; ++l) {
+    for (int l = 2; l < k; ++l) {
         char *a[4];
-        for(int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 4; ++i) {
             a[i] = strtok(sentences[l], ",");
 
-            while(a[i]!=NULL)
+            while (a[i] != NULL)
                 a[++i] = strtok(NULL, ",");
 
         }
-//        printf(">>> %s | %s | %s \n", a[0], a[1], a[2]);
+//        fprintf(outFile, ">>> %s | %s | %s \n", a[0], a[1], a[2]);
         unsigned processID = atoi(a[0]), arrivalTime = atoi(a[1]), cpuBurstTime = atoi(a[2]);
         enqueue(q, newProcess(&processID, &arrivalTime, &cpuBurstTime));
     }
@@ -171,10 +181,10 @@ void delay(int ms) {
     long halt;
     clock_t current, previous;
 
-    halt = ms*(CLOCKS_PER_SEC/1000);
+    halt = ms * (CLOCKS_PER_SEC / 1000);
     current = previous = clock();
 
-    while((current-previous) < halt )
+    while ((current - previous) < halt)
         current = clock();
 }
 
@@ -203,22 +213,22 @@ void RRScheduler(Queue *ready_queue, unsigned *quantumLength) {
 
         if (newProcess->cpuBurstTime > 0) {
             // TODO: Change time
-            printf("Time %6d:\t P%d Entering quantum\n", c, newProcess->processID);
-            c += (i < newProcess->cpuBurstTime)? i: newProcess->cpuBurstTime;
+            fprintf(outFile, "Time %6d:\t P%d Entering quantum\n", c, newProcess->processID);
+            c += (i < newProcess->cpuBurstTime) ? i : newProcess->cpuBurstTime;
 
             newProcess->cpuBurstTime = computeBurstTime(newProcess, quantumLength);
 
             if (newProcess->cpuBurstTime == 0) {
                 AverageWaitingTime += c - newProcess->completionTime;
                 AverageTurnaroundTime += c;
-//                printf("Average Waiting Time= %d\n", AverageWaitingTime);
-//                printf("Average Turnaround Time= %d\n", AverageTurnaroundTime);
-                printf("Time %6d:\t P%d Done Turn around: %d Waiting time: %d\n", c, newProcess->processID, c, c - newProcess->completionTime);
+//                fprintf(outFile, "Average Waiting Time= %d\n", AverageWaitingTime);
+//                fprintf(outFile, "Average Turnaround Time= %d\n", AverageTurnaroundTime);
+                fprintf(outFile, "Time %6d:\t P%d Done Turn around: %d Waiting time: %d\n", c, newProcess->processID, c,
+                       c - newProcess->completionTime);
 
                 ready_queue->procArr[ready_queue->front] = NULL;
 
-            }
-            else {
+            } else {
                 newProcess->contextSwitchCount += 1;
             }
 
@@ -229,19 +239,22 @@ void RRScheduler(Queue *ready_queue, unsigned *quantumLength) {
     }
 
 
-    printf("\nAverage Waiting Time= %f\n", AverageWaitingTime/ready_queue->capacity);
-    printf("Average Turnaround Time= %f\n", AverageTurnaroundTime/ready_queue->capacity);
+    fprintf(outFile, "\nAverage Waiting Time= %f\n", AverageWaitingTime / ready_queue->capacity);
+    fprintf(outFile, "Average Turnaround Time= %f\n", AverageTurnaroundTime / ready_queue->capacity);
 }
 
 
 /*********************************************/
 
 int main(int argc, char *argv[]) {
+    
     char *FILENAME = "/Users/amrmkayid/Desktop/RoundRobin/Input1.in";
+    outFile = fopen("Output1-RR.txt","w");
+
     int queueSize = getQueueSizeFromInput(FILENAME);
     Queue *ready_queue = newQueue(queueSize);
+
     readCSV(ready_queue, FILENAME);
-//    printf("Quantum Length: %d\n", quantumLength);
 
     RRScheduler(ready_queue, &quantumLength);
 
