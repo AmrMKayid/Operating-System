@@ -31,14 +31,6 @@ public class Operator {
             e.printStackTrace();
         }
 
-        // Check for input
-        System.out.println(max_wait_time);
-        System.out.println(players.size());
-        for (Player p :
-                players) {
-            System.out.println(p);
-        }
-
     }
 
     public static void main(String[] args) {
@@ -46,6 +38,11 @@ public class Operator {
         readCSV("resources/input-1.txt");
 
         wheel = new Wheel(max_wait_time);
+
+        for (Player p :
+                players) {
+            p.start();
+        }
 
 
     }

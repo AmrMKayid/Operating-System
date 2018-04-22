@@ -23,9 +23,10 @@ public class Player extends Thread {
             System.out.println(e);
         }
 
-        System.out.println("player wakes up: " + playerID);
+        System.out.printf("player wakes up: %d\n", playerID);
 
         // TODO: Add to operatort queue
+        System.out.printf("passing player: %d to the operator\n", playerID);
 
     }
 
