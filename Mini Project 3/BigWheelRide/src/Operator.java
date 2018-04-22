@@ -38,12 +38,15 @@ public class Operator {
         readCSV("resources/input-1.txt");
 
         wheel = new Wheel(max_wait_time);
+        wheel.start();
 
         for (Player p :
                 players) {
             p.start();
-        }
 
+            wheel.load_players(p);
+            wheel.run_ride(p);
+        }
 
     }
 
