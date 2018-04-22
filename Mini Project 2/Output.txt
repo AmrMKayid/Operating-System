@@ -1,21 +1,22 @@
-At time 0 : p3 Entering quantum
-At time 1000 : p3 Entering quantum
-At time 2000 : p3 Entering quantum
+At time 0 : p1 Entering quantum
+At time 1000 : p2 Entering quantum
+At time 2000 : p4 Entering quantum
 At time 3000 : p2 Entering quantum
-At time 4000 : p3 Entering quantum
-At time 4500 : p2 Entering quantum
-At time 5500 : p4 Entering quantum
-At time 5600 : p2 Entering quantum
-At time 6600 : p2 Entering quantum
-At time 7600 : p2 Entering quantum
-At time 8600 : p1 Entering quantum
-At time 9600 : p2 Entering quantum
-At time 10600 : p2 Entering quantum
-At time 11600 : p1 Entering quantum
-At time 12600 : p1 Entering quantum
-At time 13600 : p1 Entering quantum
-At time 14600 : p1 Entering quantum
-At time 15600 : p1 Entering quantum
+At time 4000 : p2 Entering quantum
+At time 5000 : p2 Entering quantum
+At time 6000 : p2 Entering quantum
+At time 7000 : p4 Entering quantum
+At time 8000 : p2 Entering quantum
+At time 9000 : p3 Entering quantum
+At time 10000 : p1 Entering quantum
+At time 11000 : p3 Entering quantum
+At time 12000 : p3 Entering quantum
+At time 13000 : p2 Entering quantum
+At time 14000 : p3 Entering quantum
+At time 14500 : p1 Entering quantum
+At time 15500 : p1 Entering quantum
+At time 16500 : p1 Entering quantum
+At time 17500 : p1 Entering quantum
 
-Average Turnarround Time = 8063.750000
-Average Waiting Time = 4050.000000
+Average Turnarround Time = 11638.750000
+Average Waiting Time = 7625.000000
