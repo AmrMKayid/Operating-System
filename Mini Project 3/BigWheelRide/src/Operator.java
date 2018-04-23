@@ -68,6 +68,8 @@ public class Operator {
 
 	public synchronized static void addToTheQueue(Player player) 
 	{
+		System.out.printf("player wakes up: %d\n", player.playerID);
+		System.out.printf("passing player: %d to the operator\n", player.playerID);
 		queue.add(player);
 	}
 	

@@ -22,9 +22,6 @@ public class Player extends Thread {
 
 		try {
 			sleep(waitingTime);
-			System.out.printf("player wakes up: %d\n", playerID);
-			System.out.printf("passing player: %d to the operator\n", playerID);
-
 			Operator.addToTheQueue(this);
 
 		} catch (Exception e) {
