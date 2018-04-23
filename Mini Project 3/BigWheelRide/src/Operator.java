@@ -38,7 +38,7 @@ public class Operator {
 
 	public static void main(String[] args) {
 
-		readCSV("resources/input-1.txt");
+		readCSV("resources/input-2.txt");
 
 		wheel = new Wheel(max_wait_time);
 
@@ -51,13 +51,14 @@ public class Operator {
 		while (true) {
 			
 			
-			if (!queue.isEmpty()) {
-				addPlayerToTheWheel();
-			}
-
 			if (wheel.getPlayerCount() == 5) {
 				wheel.interrupt();
 			}
+			else if (!queue.isEmpty()) {
+				addPlayerToTheWheel();
+			}
+			
+			
 			
 
 			if (myCounter == maxCount)
