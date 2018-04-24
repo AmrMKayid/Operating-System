@@ -18,7 +18,7 @@ public class Operator {
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line;
 
-            max_wait_time = Integer.parseInt(bufferedReader.readLine());
+            max_wait_time = Integer.parseInt(bufferedReader.readLine())*50;
             maxCount = Integer.parseInt(bufferedReader.readLine());
             players = new ArrayList<>();
 
@@ -27,7 +27,7 @@ public class Operator {
                     String[] playerInfo = line.split(",");
                     int id = Integer.parseInt(playerInfo[0]);
                     int waitingTime = Integer.parseInt(playerInfo[1]);
-                    players.add(new Player(id, waitingTime));
+                    players.add(new Player(id, waitingTime*50));
                 }
             }
             fileReader.close();
@@ -50,16 +50,12 @@ public class Operator {
 
         while (true) {
 
-
             if (wheel.getPlayerCount() == 5) {
                 wheel.interrupt();
             } else if (!queue.isEmpty()) {
                 addPlayerToTheWheel();
             }
 
-
-            if (myCounter == maxCount)
-                System.exit(0);
         }
 
     }
@@ -72,6 +68,10 @@ public class Operator {
 
     public synchronized static void incMyCounter(int NumberOfPlayersOnTheWeel) {
         myCounter += NumberOfPlayersOnTheWeel;
+        if (myCounter == maxCount) {
+            System.out.println("wheel end sleep\n");
+            System.exit(0);
+        }
     }
 
     public synchronized static void addPlayerToTheWheel() {

@@ -21,13 +21,7 @@ public class Wheel extends Thread {
 
     public synchronized void load_players(Player p) {
         playersList.add(p);
-        playersCount++;
-        System.out.printf("Player %d on board, capacity: %d\n", p.playerID, playersCount);
-    }
-
-
-    public synchronized void run_ride() {
-        end_ride();
+        System.out.printf("Player %d on board, capacity: %d\n", p.playerID, ++playersCount);
     }
 
     public synchronized void end_ride() {
@@ -35,14 +29,19 @@ public class Wheel extends Thread {
         if (playersCount == 5)
             System.err.println("Wheel is full, Let's go for a ride");
 
-        System.out.println("Threads in this ride are: ");
+        System.err.println("Threads in this ride are: ");
+
         for (Player player : playersList) {
             System.out.print(player.playerID + ", ");
         }
-        System.out.println();
+
+        System.out.println("\n");
         playersList.clear();
         Operator.incMyCounter(playersCount);
         playersCount = 0;
+
+        System.out.println("wheel end sleep\n");
+
     }
 
     @Override
@@ -51,12 +50,10 @@ public class Wheel extends Thread {
             try {
                 System.out.println("wheel start sleep");
                 sleep(maxWaiting);
-                System.out.println("wheel end sleep");
             } catch (InterruptedException e) {
             }
 
-            run_ride();
-
+            end_ride();
         }
     }
 }

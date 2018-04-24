@@ -23,7 +23,6 @@ public class Player extends Thread {
         try {
             sleep(waitingTime);
             Operator.addToTheQueue(this);
-
         } catch (Exception e) {
             System.out.println(e);
         }
