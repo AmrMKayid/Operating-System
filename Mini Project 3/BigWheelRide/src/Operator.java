@@ -3,74 +3,80 @@ import java.io.*;
 
 public class Operator {
 
-    Wheel wheel;
-    ArrayList<Player> players;
-    int max_wait_time;
-    int finished = 0;
+    public static Wheel wheel;
+    static ArrayList<Player> players;
+    static int max_wait_time;
+    static int maxCount = 0;
+    static int myCounter = 0;
+    public static ArrayList<Player> queue = new ArrayList<Player>();
 
-    public Operator() {
 
-        readCSV("resources/input-1.txt");
-
-        wheel.start();
-        for (Player p :
-                players) {
-            p.start();
-        }
-    }
-
-    public void readCSV(String inputFile) {
+    public static void readCSV(String inputFile) {
         try {
             File file = new File(inputFile);
             FileReader fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
-            StringBuffer stringBuffer = new StringBuffer();
             String line;
 
-            max_wait_time = Integer.parseInt(bufferedReader.readLine());
-            wheel = new Wheel(max_wait_time);
-            players = new ArrayList<>(Integer.parseInt(bufferedReader.readLine()));
+            max_wait_time = Integer.parseInt(bufferedReader.readLine())*50;
+            maxCount = Integer.parseInt(bufferedReader.readLine());
+            players = new ArrayList<>();
 
             while ((line = bufferedReader.readLine()) != null) {
                 if (line.length() > 0) {
                     String[] playerInfo = line.split(",");
                     int id = Integer.parseInt(playerInfo[0]);
                     int waitingTime = Integer.parseInt(playerInfo[1]);
-                    players.add(new Player(id, waitingTime, this));
+                    players.add(new Player(id, waitingTime*50));
                 }
             }
             fileReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
-    public synchronized void passPlayer(Player p) {
+    public static void main(String[] args) {
 
-        while (wheel.playersCount == 5);
+        readCSV("resources/input-1.txt");
 
-        System.out.printf("passing player: %d to the operator\n", p.playerID);
-        wheel.load_players(p);
+        wheel = new Wheel(max_wait_time);
 
-        if (wheel.playersCount == 5)
-            this.wheel.interrupt();
+        wheel.start();
 
-        finished++;
-        System.err.println(finished);
-//        System.err.printf("Finished: %d, Size: %d\n", finished, players.size());
-        if (finished == players.size()) {
-            System.err.println("Finisheddddddd");
-            this.wheel.isRunning = false;
+        for (Player p : players) {
+            p.start();
+        }
+
+        while (true) {
+
+            if (wheel.getPlayerCount() == 5) {
+                wheel.interrupt();
+            } else if (!queue.isEmpty()) {
+                addPlayerToTheWheel();
+            }
+
         }
 
     }
 
-    public static void main(String[] args) {
-        // TODO Auto-generated method stub
-
-        Operator op = new Operator();
-
+    public synchronized static void addToTheQueue(Player player) {
+        System.out.printf("player wakes up: %d\n", player.playerID);
+        System.out.printf("passing player: %d to the operator\n", player.playerID);
+        queue.add(player);
     }
+
+    public synchronized static void incMyCounter(int NumberOfPlayersOnTheWeel) {
+        myCounter += NumberOfPlayersOnTheWeel;
+        if (myCounter == maxCount) {
+            System.out.println("wheel end sleep\n");
+            System.exit(0);
+        }
+    }
+
+    public synchronized static void addPlayerToTheWheel() {
+        wheel.load_players(queue.remove(0));
+    }
+
 
 }
