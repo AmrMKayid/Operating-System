@@ -3,23 +3,37 @@
 #include <stdlib.h>
 #include <memory.h>
 
+typedef struct page Page;
+unsigned numOfFrames = 5;
+unsigned numOfPages;
+
 int getFileLines(char *filename);
 void readCSV(char *filename);
 
 int main() {
 
-    char *FILENAME = "/Users/amrmkayid/Desktop/PageReplacement/pages.txt";
+    char *FILENAME = "/Volumes/Life/GUC/Projects/OS/Mini Project 4/PageReplacement//pages.txt";
+
+    numOfPages = getFileLines(FILENAME);
+    printf("numOfPages: %i\n", numOfPages);
+
     readCSV(FILENAME);
 
     return 0;
 }
+
+typedef struct page {
+    unsigned pageID;
+    unsigned referencedBit;
+    unsigned modifiedBit;
+} Page;
 
 void readCSV(char *filename) {
 
     FILE *fPointer;
     fPointer = fopen(filename, "r");
 
-    int lines = getFileLines(filename) + 2;
+    int lines = getFileLines(filename);
 
     char singleLine[1024];
 
