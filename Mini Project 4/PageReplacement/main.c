@@ -2,11 +2,12 @@
 #include <time.h>
 #include <stdlib.h>
 #include <memory.h>
+#include <stdbool.h>
 
 typedef struct page Page;
 typedef struct node Node;
 
-unsigned numOfFrames = 5;
+unsigned numOfFrames;
 unsigned numOfPages;
 
 int getFileLines(char *filename);
@@ -91,6 +92,21 @@ void printList(Node *node, void (*fptr)(void *)) {
 
 /*************************************/
 
+bool isFound(Page listOfPages[5], Page *p, int size) {
+    for(int i = 0; i < size; ++i) {
+        if(listOfPages[i].pageID == p->pageID)
+            return true;
+    }
+    return false;
+}
+
+void pop(Page listOfPages[5], int size, int index) {
+    for (int i = 0; i < size; ++i) {
+        listOfPages[i] = listOfPages[i + 1];
+    }
+    index--;
+}
+
 void readCSV(Node *start, char *filename) {
 
     FILE *fPointer;
@@ -99,7 +115,6 @@ void readCSV(Node *start, char *filename) {
     int lines = getFileLines(filename);
 
     char singleLine[1024];
-
 
     int k = 0;
 
@@ -111,7 +126,8 @@ void readCSV(Node *start, char *filename) {
         k++;
     }
 
-    unsigned page_size = sizeof(Page);
+    Page *listOfPages[numOfFrames];
+    int index = 0;
 
     for (int l = 0; l < k; ++l) {
         char *a[3];
@@ -124,11 +140,25 @@ void readCSV(Node *start, char *filename) {
         }
         int accessTime = atoi(a[0]), pageID = atoi(a[1]);
         char *bitType = a[2];
-        push(&start, newPage(accessTime, pageID, bitType), page_size);
+
+
+        /*
+         * FIFO page replacement algorithm
+         */
+
+        if(index < numOfFrames) {
+            Page *p = newPage(accessTime, pageID, bitType);
+            if(!isFound(&listOfPages, p, numOfFrames))
+                listOfPages[index++] = p;
+        } else {
+            pop(&listOfPages, numOfFrames, index);
+        }
+
+//        printPage(listOfPages[--index]);
+//        push(&start, newPage(accessTime, pageID, bitType), page_size);
 
     }
 
-    printList(start, printPage);
     fclose(fPointer);
 }
 
@@ -156,69 +186,11 @@ int main() {
     numOfPages = getFileLines(FILENAME);
     printf("numOfPages: %i\n", numOfPages);
 
+    numOfFrames = 5;
+
     Node *start = NULL;
 
     readCSV(start, FILENAME);
 
-    printList(start, printPage);
-
     return 0;
 }
-
-/*
-#include<stdio.h>
-
-int main() {
-    int k, nop, frame_size, i, j, temp = 100, page_fault = 0;
-    int page_name[20], frame[20];
-    int m, n = 0, count = 0;
-    printf("Enter the No. of pages\t");
-    scanf("%d", &nop);
-    printf("Enter the frame size\t");
-    scanf("%d", &frame_size);
-    printf("Enter page name\n");
-    for (i = 0; i < nop; i++)
-        scanf("%d", &page_name[i]);
-    for (i = 0; i < frame_size; i++)
-        frame[i] = 0;
-    for (i = 0, j = 0; i < frame_size; i++, j++) {
-        frame[j] = page_name[i];
-        page_fault++;
-        printf("\npage\t%d\t", page_name[i]);
-        printf("Frame\t");
-        for (k = 0; k < frame_size; k++)
-            printf(" %d", frame[k]);
-        printf("\tPage fault till now:\t");
-        printf("%d", page_fault);
-    }
-    j = 0;
-
-    for (m = i; m < nop; m++) {
-        if (page_name[m] == frame[j]) {
-            j++;
-            count++;
-            printf("\npage\t%d\t", page_name[m]);
-            printf("Frame\t");
-            for (k = 0; k < frame_size; k++)
-                printf(" %d", frame[k]);
-            printf("\tPage fault till now:\t");
-            printf("%d", page_fault);
-        } else {
-            frame[j] = page_name[m];
-            page_fault++;
-            j++;
-            count++;
-            printf("\npage\t%d\t", page_name[m]);
-            printf("Frame\t");
-            for (k = 0; k < frame_size; k++)
-                printf(" %d", frame[k]);
-            printf("\tPage fault till now:\t");
-            printf("%d", page_fault);
-
-        }
-        if (count == frame_size)
-            j = 0;
-    }
-    return 0;
-}
- */
